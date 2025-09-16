@@ -1,0 +1,32 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
+  <div class="container">
+    <%= link_to "Todo App", root_path, class: "navbar-brand" %>
+
+    <button class="navbar-toggler" type="button"
+            data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+
+          <li class="nav-item"> 
+            <%= link_to "Tasks", tasks_path, class:"nav-link" %>
+          </li>
+
+          <li class="nav-item"> 
+            <%= link_to "Add Task", new_task_path, class:"nav-link" %>
+          </li>
+
+        </li>
+      </ul>
+
+      <%= form_with url: "#", method: :get, local: true, class: "d-flex", role: "search" do |f| %>
+        <%= f.search_field :q, placeholder: "Search", class: "form-control me-2", "aria-label": "Search" %>
+        <%= f.submit "Search", class: "btn btn-success" %> <!-- nút xanh đặc -->
+      <% end %>
+    </div>
+  </div>
+</nav>

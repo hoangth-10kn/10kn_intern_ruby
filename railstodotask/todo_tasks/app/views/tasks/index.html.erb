@@ -1,0 +1,44 @@
+<%# đảm bảo trang đã nạp Bootstrap CSS/JS như mình chỉ trước đó %>
+
+<h1 class="mb-4">Task List</h1>
+
+<div class="card shadow-sm">
+  <div class="list-group list-group-flush">
+    <% @tasks.each do |task| %>
+      <%# ---- chuẩn hoá ngày: nhận date/due_date/created_at, có thể là String ---- %>
+      <% raw = (task.respond_to?(:date) ? task.date :
+               (task.respond_to?(:due_date) ? task.due_date : task.created_at)) %>
+      <%
+        d =
+          case raw
+          when String
+            (Date.strptime(raw, '%d/%m/%Y') rescue (Time.zone.parse(raw) rescue nil))
+          when Date, Time, DateTime, ActiveSupport::TimeWithZone
+            raw
+          else
+            nil
+          end
+      %>
+      <% formatted = d ? l(d, format: :long) : (raw.presence || "—") %>
+      <%# ------------------------------------------------------------------------- %>
+
+      <div class="list-group-item d-flex justify-content-between align-items-center">
+        <div class="me-3">
+          <div class="fw-semibold"><%= task.title.presence || "—" %></div>
+          <small class="text-muted">Date: <%= formatted %></small>
+        </div>
+
+        <div class="text-nowrap">
+          <%= link_to "Show", task, class: "btn btn-sm btn-outline-primary me-2" %>
+          <%= link_to "Edit", edit_task_path(task), class: "btn btn-sm btn-outline-secondary me-2" %>
+          <%= button_to "Destroy", task, method: :delete,
+                data: { confirm: "Are you sure?" },
+                form: { class: "d-inline" },
+                class: "btn btn-sm btn-outline-danger" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<%= link_to "New task", new_task_path, class: "btn btn-primary mt-3" %>
