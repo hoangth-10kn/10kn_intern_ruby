@@ -11,15 +11,33 @@
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :title, style: "display: block" %>
-    <%= form.text_field :title %>
+
+
+  <div class="display: block">
+
+    <%= form.text_field:title, 
+      class:"display: block",
+      placeholder:"Title" %>
+  </div>  
+
+<br/>
+
+  <div class="display: block">
+
+    <%= form.text_field:date, 
+      class:"display: block",
+      placeholder:"Date" %>
   </div>
 
-  <div>
-    <%= form.label :date, style: "display: block" %>
-    <%= form.text_field :date %>
-  </div>
+<br/> 
+
+  <div class="display: block">
+
+    <%= form.number_field:user_id,
+      id: :task_user_id,
+      class:"display: block",
+      value:current_user.id, type: :hidden %>
+  </div> 
 
   <div>
     <%= form.submit %>

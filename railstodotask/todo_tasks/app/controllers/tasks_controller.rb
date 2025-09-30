@@ -1,10 +1,18 @@
 class TasksController < ApplicationController
   before_action :set_task, only: %i[ show edit update destroy ]
+  before_action :authenticate_user!, except: [ :index, :show ]
+  before_action :correct_user, only: [ :edit, :update, :destroy ]
 
   # GET /tasks or /tasks.json
   def index
     @tasks = Task.all
   end
+
+  # app/controllers/tasks_controller.rb
+  def index
+    @tasks = Task.includes(:user).order(created_at: :desc)
+  end
+
 
   # GET /tasks/1 or /tasks/1.json
   def show
@@ -12,7 +20,8 @@ class TasksController < ApplicationController
 
   # GET /tasks/new
   def new
-    @task = Task.new
+    # @task = Task.new
+    @task = current_user.tasks.build
   end
 
   # GET /tasks/1/edit
@@ -21,7 +30,8 @@ class TasksController < ApplicationController
 
   # POST /tasks or /tasks.json
   def create
-    @task = Task.new(task_params)
+    # @task = Task.new(task_params)            # cũ (nếu có)
+    @task = current_user.tasks.build(task_params)   # CHANGED: gán chủ là user đang đăng nhập
 
     respond_to do |format|
       if @task.save
@@ -57,14 +67,19 @@ class TasksController < ApplicationController
     end
   end
 
-  private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_task
-      @task = Task.find(params.expect(:id))
-    end
+  def correct_user
+    @task = current_user.tasks.find_by(id: params[:id])
+    redirect_to tasks_path, notice: "Not Authorized To Edit This Task" if @task.nil?
+  end
 
-    # Only allow a list of trusted parameters through.
-    def task_params
-      params.expect(task: [ :title, :date ])
-    end
+  private
+
+  def set_task
+    @task = current_user.tasks.find(params[:id])
+  end
+
+  def task_params
+    # KHÖNG permit :user_id để tránh đổi chủ qua form
+    params.require(:task).permit(:title, :date, :due_at)
+  end
 end

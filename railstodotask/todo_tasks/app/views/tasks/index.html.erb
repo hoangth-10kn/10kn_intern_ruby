@@ -1,10 +1,10 @@
 <%# đảm bảo trang đã nạp Bootstrap CSS/JS như mình chỉ trước đó %>
-
 <h1 class="mb-4">Task List</h1>
 
 <div class="card shadow-sm">
   <div class="list-group list-group-flush">
     <% @tasks.each do |task| %>
+      <% if task.user == current_user %>
       <%# ---- chuẩn hoá ngày: nhận date/due_date/created_at, có thể là String ---- %>
       <% raw = (task.respond_to?(:date) ? task.date :
                (task.respond_to?(:due_date) ? task.due_date : task.created_at)) %>
@@ -19,14 +19,60 @@
             nil
           end
       %>
-      <% formatted = d ? l(d, format: :long) : (raw.presence || "—") %>
-      <%# ------------------------------------------------------------------------- %>
+      
+      <%
+        # CHỈ THÊM/SỬA ở đoạn format này
+        local =
+          if d.is_a?(Date)
+            d.to_time.in_time_zone           # ADDED: Date -> TimeWithZone (Asia/Ho_Chi_Minh)
+          else
+            d&.in_time_zone                  # ADDED: Time/DateTime -> về Time.zone
+          end
+
+        # SỬA: Chỉ hiển thị ngày (không có thời gian và năm)
+        formatted = local ? l(local, format: '%d/%m') : (raw.presence || "—")
+        
+        # THÊM MỚI: Xử lý created_at để hiển thị thời gian tạo task
+        create_time = 
+          if task.created_at.present?
+            task.created_at.in_time_zone
+          else
+            nil
+          end
+        
+        create_time_formatted = create_time ? l(create_time, format: :long) : "—"
+        
+        # THÊM MỚI: Xử lý updated_at để hiển thị thời gian cập nhật cuối cùng
+        last_updated = 
+          if task.updated_at.present?
+            task.updated_at.in_time_zone
+          else
+            nil
+          end
+        
+        last_updated_formatted = last_updated ? l(last_updated, format: :long) : "—"
+      %>
+
 
       <div class="list-group-item d-flex justify-content-between align-items-center">
-        <div class="me-3">
-          <div class="fw-semibold"><%= task.title.presence || "—" %></div>
-          <small class="text-muted">Date: <%= formatted %></small>
-        </div>
+
+      <div class="me-3">
+        <div class="fw-semibold"><%= task.title.presence || "—" %></div>
+        
+        <!-- SỬA: Làm nổi bật Date hơn -->
+        <div class="fw-bold text-primary mb-1">Date: <%= formatted %></div>
+        
+        <!-- thêm dòng dưới: hiển thị user_id, fallback '—' nếu nil -->
+        <!--Hiển thị user id -->
+        <small class="text-muted d-block">User ID: <%= task.user_id || "—" %></small>
+        
+
+        <!-- SỬA: Đổi từ Current time thành Create time -->
+        <small class="text-muted d-block">Create time: <%= create_time_formatted %></small>
+        
+        <!-- THÊM MỚI: Hiển thị thời gian cập nhật cuối cùng -->
+        <small class="text-muted d-block">Last updated: <%= last_updated_formatted %></small>
+      </div>
 
         <div class="text-nowrap">
           <%= link_to "Show", task, class: "btn btn-sm btn-outline-primary me-2" %>
@@ -37,6 +83,7 @@
                 class: "btn btn-sm btn-outline-danger" %>
         </div>
       </div>
+      <% end %>
     <% end %>
   </div>
 </div>
